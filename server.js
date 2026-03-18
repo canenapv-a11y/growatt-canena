@@ -10,7 +10,7 @@ const PLANT_ID = '10210610';
 
 app.get('/plant', async (req, res) => {
     try {
-        // LOGIN REAL
+        // LOGIN
         const loginRes = await axios.post(
             'https://server.growatt.com/login/login',
             new URLSearchParams({
@@ -32,13 +32,13 @@ app.get('/plant', async (req, res) => {
         if (!cookies) {
             return res.json({
                 error: true,
-                message: 'Login fallido (sin cookies)'
+                message: 'Login fallido'
             });
         }
 
-        // DATOS
+        // DATOS REALES (endpoint correcto)
         const dataRes = await axios.post(
-            'https://server.growatt.com/plantDetail',
+            'https://server.growatt.com/panel/getPlantData',
             new URLSearchParams({
                 plantId: PLANT_ID
             }),
@@ -47,7 +47,7 @@ app.get('/plant', async (req, res) => {
                     'Content-Type': 'application/x-www-form-urlencoded',
                     'User-Agent': 'Mozilla/5.0',
                     'Origin': 'https://server.growatt.com',
-                    'Referer': 'https://server.growatt.com',
+                    'Referer': 'https://server.growatt.com/panel',
                     'Cookie': cookies.join(';')
                 }
             }
