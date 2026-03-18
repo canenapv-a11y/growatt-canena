@@ -1,17 +1,17 @@
-const express = require('express');
-const axios = require('axios');
-const app = express();
+import express from 'express';
+import axios from 'axios';
 
+const app = express();
 const PORT = process.env.PORT || 3000;
 
-// ⚠️ tus datos
+// ⚠️ datos
 const USERNAME = 'colegio Caena';
 const PASSWORD = 'colecanena2025';
 const PLANT_ID = '10210610';
 
 app.get('/plant', async (req, res) => {
     try {
-        // 1. LOGIN
+        // LOGIN
         const loginRes = await axios.post(
             'https://server.growatt.com/login',
             new URLSearchParams({
@@ -25,10 +25,9 @@ app.get('/plant', async (req, res) => {
             }
         );
 
-        // 2. EXTRAER COOKIES
         const cookies = loginRes.headers['set-cookie'];
 
-        // 3. PETICIÓN DE DATOS
+        // DATOS
         const dataRes = await axios.post(
             'https://server.growatt.com/plantDetail',
             new URLSearchParams({
@@ -53,5 +52,5 @@ app.get('/plant', async (req, res) => {
 });
 
 app.listen(PORT, () => {
-    console.log('Servidor funcionando en puerto ' + PORT);
+    console.log('Servidor listo');
 });
