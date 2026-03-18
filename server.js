@@ -1,52 +1,57 @@
-import express from "express";
-import fetch from "node-fetch";
-import tough from "tough-cookie";
-import fetchCookie from "fetch-cookie";
-
+const express = require('express');
+const axios = require('axios');
 const app = express();
+
 const PORT = process.env.PORT || 3000;
 
-const cookieJar = new tough.CookieJar();
-const fetchWithCookies = fetchCookie(fetch, cookieJar);
+// ⚠️ tus datos
+const USERNAME = 'colegio Caena';
+const PASSWORD = 'colecanena2025';
+const PLANT_ID = '10210610';
 
-const USER = process.env.GROWATT_USER;
-const PASS = process.env.GROWATT_PASS;
-const PLANT = "10210610";
+app.get('/plant', async (req, res) => {
+    try {
+        // 1. LOGIN
+        const loginRes = await axios.post(
+            'https://server.growatt.com/login',
+            new URLSearchParams({
+                account: USERNAME,
+                password: PASSWORD
+            }),
+            {
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                }
+            }
+        );
 
-app.get("/plant", async (req, res) => {
-  try {
-    await fetchWithCookies("https://server.growatt.com/login", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/x-www-form-urlencoded",
-        "User-Agent": "Mozilla/5.0"
-      },
-      body: new URLSearchParams({
-        account: USER,
-        password: PASS
-      })
-    });
+        // 2. EXTRAER COOKIES
+        const cookies = loginRes.headers['set-cookie'];
 
-    const r = await fetchWithCookies(
-      "https://server.growatt.com/panel/plant/getPlantData",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded",
-          "User-Agent": "Mozilla/5.0"
-        },
-        body: new URLSearchParams({
-          plantId: PLANT
-        })
-      }
-    );
+        // 3. PETICIÓN DE DATOS
+        const dataRes = await axios.post(
+            'https://server.growatt.com/plantDetail',
+            new URLSearchParams({
+                plantId: PLANT_ID
+            }),
+            {
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    Cookie: cookies.join(';')
+                }
+            }
+        );
 
-    const data = await r.text();
-    res.send(data);
+        res.json(dataRes.data);
 
-  } catch (e) {
-    res.json({ error: "fallo", detalle: e.toString() });
-  }
+    } catch (error) {
+        res.json({
+            error: true,
+            message: error.message
+        });
+    }
 });
 
-app.listen(PORT, () => console.log("Servidor listo"));
+app.listen(PORT, () => {
+    console.log('Servidor funcionando en puerto ' + PORT);
+});
