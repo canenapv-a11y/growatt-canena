@@ -54,3 +54,6 @@ app.get('/plant', async (req, res) => {
 app.listen(PORT, () => {
     console.log('Servidor listo');
 });
+app.get('/', (req, res) => {
+    res.send('Servidor Growatt funcionando OK');
+});
